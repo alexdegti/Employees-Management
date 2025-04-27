@@ -1,0 +1,59 @@
+﻿@page "/employees/delete"
+@rendermode InteractiveServer
+@using Gilsar.Models
+@using Gilsar.Services
+@inject EmployeeServices employeeServices
+@inject NavigationManager navigationManager
+
+@if(!(employee is null)){
+	<dl class="row">
+	<dt class="col-sm-2"> name: </dt>
+	<dd class="col-sm-10"> @employee?.name </dd>
+	</dl>
+	<dl class="row">
+		<dt class="col-sm-2"> title: </dt>
+		<dd class="col-sm-10"> @employee?.title </dd>
+	</dl>
+	<dl class="row">
+		<dt class="col-sm-2"> salary: </dt>
+		<dd class="col-sm-10"> @employee?.salary </dd>
+	</dl>
+	<dl class="row">
+		<dt class="col-sm-2"> profile image path: </dt>
+		<dd class="col-sm-10"> @employee?.profileImagePath </dd>
+	</dl>
+	<EditForm method="post" Model="employee" OnValidSubmit="DeleteEmployee" FormName="delete" Enhance>
+		<button type="submit" class="btn btn-danger"> Delete </button> |
+		<a href="/employees"> Back </a>
+	</EditForm>
+}
+else{
+	<a href="/employees"> Back </a>
+}
+
+@code{
+	
+	//A field that stores the id property from the URL query.
+	[SupplyParameterFromQuery]
+	private int id{get; set;}
+
+	//A field that stores the Employee object to be deleted.
+	private Employee? employee;
+	
+	//Performs initialisation. Searches for a matching Employee
+	//object in the employeesList property.
+	protected override void OnInitialized() => employee = employeeServices.GetEmployees()
+															.Find(matchingEmployee => matchingEmployee.id == id);
+	
+	//A callback that deletes the adequate Employee
+	//object upon a button press.
+	private void DeleteEmployee(){
+
+		if(!(employee is null)){
+			employeeServices.DeleteEmployee(employee);
+			navigationManager.NavigateTo("/employees");
+		}
+
+	}
+
+}

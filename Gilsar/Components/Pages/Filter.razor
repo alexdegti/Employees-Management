@@ -1,0 +1,77 @@
+﻿@page "/employees/filter"
+@rendermode InteractiveServer
+@using Gilsar.Models
+@using Gilsar.Services
+@inject EmployeeServices employeeServices
+@inject NavigationManager navigationManager
+
+<div class="row">
+	<div class="col-md-4">
+		<div class="mb-3">
+			<InputText @bind-Value="nameFilter"></InputText>
+			<button class="btn btn-primary" @onclick="FilterByName"> filter by name </button>
+		</div>
+		<div class="mb-3">
+			<InputNumber @bind-Value="salaryFilter"></InputNumber>
+			<button class="btn btn-primary" @onclick="FilterBySalary"> filter by salary </button>
+		</div>
+		<div class="mb-3">
+			<InputSelect @bind-Value="titleFilter">
+				@foreach(var title in Enum.GetValues(typeof(Employee.Title))){
+					<option value="@title"> @title </option>
+				}
+			</InputSelect>
+			<button class="btn btn-primary" @onclick="FilterByTitle"> filter by title </button>
+		</div>
+	</div>
+</div>
+
+<p><a href="/employees"> Back </a></p>
+
+@if(!(filteredEmployeesList is null)){
+	@foreach(Employee employee in filteredEmployeesList){
+		<Card Color="CardColor.Warning" TextAlignment="Alignment.Center" Style="width:18rem;">
+			<img class="rounded-top" src="@employee.profileImagePath" height="320"/>
+			<ul class="list-group list-group-flush">
+				<li class="list-group-item"> id: @employee.id </li>
+				<li class="list-group-item"> name: @employee.name </li>
+				<li class="list-group-item">
+					title: @employee.title
+					<Icon Name="@Employee.TitleToIcon(employee.title)"></Icon>
+				</li>
+				<li class="list-group-item"> salary: @employee.salary </li>
+			</ul>
+		</Card>
+	}
+}
+
+@code{
+
+	//A field that stores the filtered list of employees.
+	private List<Employee>? filteredEmployeesList;
+
+	//A field that stores the string to filter the names by.
+	private string nameFilter = "";
+
+	//A field that stores the integer to filter the salaries by.
+	private int salaryFilter = 0;
+
+	//A field that stores the enum Title to filter the titles by.
+	private Employee.Title titleFilter;
+
+	//A callback that filters the employees list by the name
+	//property.
+	private void FilterByName() => filteredEmployeesList = employeeServices.GetEmployees()
+																.FindAll(employee => employee.name.StartsWith(nameFilter));
+
+	//A callback that filters the employees list by the salary
+	//property.
+	private void FilterBySalary() => filteredEmployeesList = employeeServices.GetEmployees()
+																.FindAll(employee => employee.salary >= salaryFilter);
+	
+	//A callback the filters the employees list by the title
+	//property.
+	private void FilterByTitle() => filteredEmployeesList = employeeServices.GetEmployees()
+																.FindAll(employee => employee.title == titleFilter);
+	
+}

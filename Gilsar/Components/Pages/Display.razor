@@ -1,0 +1,138 @@
+﻿@page "/employees"
+@rendermode InteractiveServer
+@using Gilsar.Models
+@using Gilsar.Services
+@inject EmployeeServices employeeServices
+
+<p>
+	<Button Color="ButtonColor.Primary" @onclick="WriteDatabaseInJSON"> Save </Button>
+</p>
+
+<p>
+	<Button Type="ButtonType.Link" Color="ButtonColor.Primary" To="/employees/add"> Add Employee </Button>
+</p>
+
+<p>
+	<Button Type="ButtonType.Link" Color="ButtonColor.Primary" To="/employees/filter"> Filter </Button>
+</p>
+
+<p>
+	<div class="d-grid gap-2 d-md-block mt-2">
+		<Button Color="ButtonColor.Primary" @onclick="SortByNameAscending"> Sort by name<Icon Name="IconName.ArrowUp"></Icon> </Button>
+		<Button Color="ButtonColor.Primary" @onclick="SortByNameDescending"> Sort by name<Icon Name="IconName.ArrowDown"></Icon> </Button>
+		<Button Color="ButtonColor.Primary" @onclick="SortBySalaryAscending"> Sort by salary<Icon Name="IconName.ArrowUp"></Icon> </Button>
+		<Button Color="ButtonColor.Primary" @onclick="SortBySalaryDescending"> Sort by salary<Icon Name="IconName.ArrowDown"></Icon> </Button>
+		<Button Color="ButtonColor.Primary" @onclick="SortByTitleAscending"> Sort by title<Icon Name="IconName.ArrowUp"></Icon> </Button>
+		<Button Color="ButtonColor.Primary" @onclick="SortByTitleDescending"> Sort by title<Icon Name="IconName.ArrowDown"></Icon> </Button>
+	</div>
+</p>
+
+@foreach(Employee employee in employeeServices.GetEmployees()){
+	<Card Color="CardColor.Warning" TextAlignment="Alignment.Center" Style="width:18rem;">
+		<img class="rounded-top" src="@employee.profileImagePath" height="320"/>
+		<ul class="list-group list-group-flush">
+			<li class="list-group-item"> id: @employee.id </li>
+			<li class="list-group-item"> name: @employee.name </li>
+			<li class="list-group-item">
+				title: @employee.title
+				<Icon Name="@Employee.TitleToIcon(employee.title)"></Icon>
+			</li>
+			<li class="list-group-item"> salary: @employee.salary </li>
+		</ul>
+		<CardBody>
+			<CardLink To="@($"employees/edit?id={employee.id}")"> Edit </CardLink>
+			<CardLink To="@($"employees/delete?id={employee.id}")"> Delete </CardLink>
+		</CardBody>
+	</Card>
+}
+
+@code{
+
+	//A method that compares between Employee objects utilising the
+	//name property.
+	private static int CompareEmployeesByName(Employee firstEmployee, Employee secondEmployee){
+		return String.Compare(firstEmployee.name, secondEmployee.name, comparisonType: StringComparison.OrdinalIgnoreCase);
+	}
+
+	//A method that compares between Employee objects utilising the
+	//salary property.
+	private static int CompareEmployeesBySalary(Employee firstEmployee, Employee secondEmployee){
+
+		int output = 0;
+
+		if(firstEmployee.salary > secondEmployee.salary)
+			output = 1;
+		else if (secondEmployee.salary > firstEmployee.salary)
+			output = -1;
+
+		return output;
+
+	}
+
+	//A method that compares between Employee objects utilising the
+	//title property.
+	private static int CompareEmployessByTitle(Employee firstEmployee, Employee secondEmployee){
+
+		int output = 0;
+
+		if((int)firstEmployee.title > (int)secondEmployee.title)
+			output = 1;
+		else if ((int)secondEmployee.title > (int)firstEmployee.title)
+			output = -1;
+
+		return output;
+
+	}
+
+	//A callback that sorts the employees by the
+	//name property in ascending order.
+	private void SortByNameAscending() => employeeServices.GetEmployees().Sort(CompareEmployeesByName);
+
+	//A callback that sorts the employees by the
+	//name property descending order.
+	private void SortByNameDescending(){
+
+		SortByNameAscending();
+		employeeServices.GetEmployees().Reverse();
+
+	}
+
+	//A callback that sorts the employees by the
+	//salary property in ascending order.
+	private void SortBySalaryAscending() => employeeServices.GetEmployees().Sort(CompareEmployeesBySalary);
+	
+	//A callback that sorts the employees by the
+	//salary property in descending order.
+	private void SortBySalaryDescending(){
+
+		SortBySalaryAscending();
+		employeeServices.GetEmployees().Reverse();
+
+	}
+
+	//A callback that sorts the employees by the
+	//title property in ascending order.
+	private void SortByTitleAscending() => employeeServices.GetEmployees().Sort(CompareEmployessByTitle);
+
+	//A callback that sorts the employees by the
+	//title property in descending order.
+	private void SortByTitleDescending(){
+
+		SortByTitleAscending();
+		employeeServices.GetEmployees().Reverse();
+
+	}
+
+	//A callback that writes the employees list to the database.
+	//(a local json file)
+	private void WriteDatabaseInJSON(){
+
+        string jsonString = JsonSerializer.Serialize(employeeServices.GetEmployees());
+
+        using(StreamWriter streamWriter = File.CreateText("database.json")){
+            streamWriter.Write(jsonString);
+        }
+
+    }
+
+}

@@ -1,0 +1,7 @@
+wwwroot\app.css
+wwwroot\favicon.png
+wwwroot\images\image1.png
+wwwroot\images\image2.png
+wwwroot\images\image3.png
+wwwroot\images\image4.png
+wwwroot\images\image5.png

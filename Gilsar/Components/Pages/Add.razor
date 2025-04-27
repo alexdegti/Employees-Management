@@ -1,0 +1,62 @@
+﻿@page "/employees/add"
+@rendermode InteractiveServer
+@using Gilsar.Models
+@using Gilsar.Services
+@inject EmployeeServices employeeServices
+@inject NavigationManager navigationManager
+
+<div class="row">
+	<div class="col-md-4">
+		<EditForm method="post" Model="employee" OnValidSubmit="AddEmployee" FormName="add" Enhance>
+			<DataAnnotationsValidator/>
+			<div class="mb-3">
+				<label for="id" class="form-label"> id: </label>
+				<InputNumber id="id" @bind-Value="employee.id" class="form-control"/>
+				<ValidationMessage For="() => employee.id" class="text-danger"/>
+			</div>
+			<div class="mb-3">
+				<label for="name" class="form-label"> name: </label>
+				<InputText id="name" @bind-Value="employee.name" class="form-control"/>
+				<ValidationMessage For="() => employee.name" class="text-danger"/>
+			</div>
+			<div class="form-group">
+				<label for="title"> title: </label>
+				<InputSelect @bind-Value="employee.title">
+					@foreach(var title in Enum.GetValues(typeof(Employee.Title))){
+						<option value="@title"> @title </option>
+					}
+				</InputSelect>
+				<ValidationMessage For="() => employee.title"/>
+			</div>
+			<div class="mb-3">
+				<label for="salary" class="form-label">salary:</label>
+				<InputNumber id="salary" @bind-Value="employee.salary" class="form-control"/>
+				<ValidationMessage For="() => employee.salary" class="text-danger"/>
+			</div>
+			<div class="mb-3">
+				<label for="profileImagePath" class="form-label"> profile image path: </label>
+				<InputText id="profileImagePath" @bind-Value="employee.profileImagePath" class="form-control"/>
+				<ValidationMessage For="() => employee.profileImagePath" class="text-danger"/>
+			</div>
+			<button type="submit" class="btn btn-primary"> Add </button> |
+			<a href="/employees"> Back </a>
+		</EditForm>
+	</div>
+</div>
+
+@code{
+
+	//A field for storing the newly created Employee object.
+	[SupplyParameterFromForm]
+	private Employee employee{get; set;} = new();
+
+	//A callback that adds the newly created Employee object
+	//to the employeesList property.
+	private void AddEmployee(){
+
+		employeeServices.AddEmployee(employee);
+		navigationManager.NavigateTo("/employees");
+
+	}
+
+}
